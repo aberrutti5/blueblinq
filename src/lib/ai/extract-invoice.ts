@@ -3,14 +3,16 @@ import { EXTRACTION_SYSTEM_PROMPT, EXTRACTION_USER_PROMPT } from "./prompts";
 import { parseExtractionResponse } from "./parse-response";
 import type { ExtractionResult } from "@/types/invoice";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+function getOpenAIClient() {
+  return new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+}
 
 export async function extractInvoiceData(
   fileUrl: string
 ): Promise<{ result: ExtractionResult; raw: unknown }> {
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAIClient().chat.completions.create({
     model: "gpt-4o",
     messages: [
       { role: "system", content: EXTRACTION_SYSTEM_PROMPT },
@@ -44,7 +46,7 @@ export async function extractInvoiceFromBase64(
 ): Promise<{ result: ExtractionResult; raw: unknown }> {
   const dataUrl = `data:${mimeType};base64,${base64Data}`;
 
-  const response = await openai.chat.completions.create({
+  const response = await getOpenAIClient().chat.completions.create({
     model: "gpt-4o",
     messages: [
       { role: "system", content: EXTRACTION_SYSTEM_PROMPT },
