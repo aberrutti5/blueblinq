@@ -1,0 +1,223 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── AUTH & MULTI-TENANCY ────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String?
+  image         String?
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  memberships CompanyMembership[]
+  accounts    Account[]
+  sessions    Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Company {
+  id              String          @id @default(cuid())
+  name            String
+  rut             String          @unique
+  contributorType ContributorType @default(NO_CEDE)
+  address         String?
+  phone           String?
+  email           String?
+  defaultCurrency String          @default("UYU")
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  memberships CompanyMembership[]
+  invoices    Invoice[]
+  vendors     Vendor[]
+  ivaRules    IvaClassificationRule[]
+}
+
+model CompanyMembership {
+  id        String   @id @default(cuid())
+  userId    String
+  companyId String
+  role      UserRole @default(VIEWER)
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, companyId])
+}
+
+enum UserRole {
+  ADMIN
+  ACCOUNTANT
+  VIEWER
+}
+
+enum ContributorType {
+  MONOTRIBUTISTA
+  NO_CEDE
+  CEDE
+}
+
+// ─── VENDORS / PROVEEDORES ───────────────────────────────────────
+
+model Vendor {
+  id              String           @id @default(cuid())
+  companyId       String
+  name            String
+  rut             String
+  address         String?
+  phone           String?
+  email           String?
+  contributorType ContributorType?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invoices Invoice[]
+
+  @@unique([companyId, rut])
+  @@index([companyId])
+}
+
+// ─── INVOICES ────────────────────────────────────────────────────
+
+model Invoice {
+  id        String @id @default(cuid())
+  companyId String
+  vendorId  String?
+
+  fileUrl       String
+  fileName      String
+  fileType      String
+  fileSizeBytes Int?
+
+  status          InvoiceStatus @default(PENDING)
+  extractionRaw   Json?
+  extractionError String?
+  confidence      Float?
+
+  invoiceType   InvoiceType?
+  invoiceNumber String?
+  invoiceDate   DateTime?
+  dueDate       DateTime?
+  vendorName    String?
+  vendorRut     String?
+  currency      String       @default("UYU")
+
+  subtotal    Decimal? @db.Decimal(15, 2)
+  totalIva    Decimal? @db.Decimal(15, 2)
+  totalAmount Decimal? @db.Decimal(15, 2)
+
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  reviewNotes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company   Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vendor    Vendor?           @relation(fields: [vendorId], references: [id])
+  lineItems InvoiceLineItem[]
+
+  @@index([companyId, status])
+  @@index([companyId, invoiceDate])
+}
+
+model InvoiceLineItem {
+  id           String      @id @default(cuid())
+  invoiceId    String
+  lineNumber   Int
+  description  String
+  quantity     Decimal     @db.Decimal(12, 4)
+  unitPrice    Decimal     @db.Decimal(15, 2)
+  lineTotal    Decimal     @db.Decimal(15, 2)
+  ivaCategory  IvaCategory @default(BASICA)
+  ivaRate      Decimal     @db.Decimal(5, 2)
+  ivaAmount    Decimal     @db.Decimal(15, 2)
+  classifiedBy String      @default("AI")
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+enum InvoiceStatus {
+  PENDING
+  PROCESSING
+  EXTRACTED
+  REVIEW
+  APPROVED
+  REJECTED
+  ERROR
+}
+
+enum InvoiceType {
+  FACTURA_A
+  FACTURA_B
+  FACTURA_C
+  FACTURA_E
+  TICKET
+  NOTA_CREDITO
+  NOTA_DEBITO
+  RESGUARDO
+}
+
+enum IvaCategory {
+  BASICA
+  MINIMA
+  EXPORTACION
+  EXONERADO
+}
+
+// ─── IVA CLASSIFICATION RULES ────────────────────────────────────
+
+model IvaClassificationRule {
+  id          String      @id @default(cuid())
+  companyId   String?
+  keyword     String
+  ivaCategory IvaCategory
+  priority    Int         @default(0)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@index([keyword])
+}
