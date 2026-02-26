@@ -43,7 +43,12 @@ Plans:
   2. An authenticated user from Company A cannot modify or approve invoices belonging to Company B, even by guessing invoice IDs
   3. Uploading a non-image/non-PDF file (e.g., an .exe or .html) is rejected by the server before reaching OpenAI
   4. Registering a company with an invalid RUT (wrong checksum) is rejected at the registration step
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — CSV export endpoint and UI button (EXPORT-01)
+- [ ] 02-02-PLAN.md — PATCH authorization check + RUT checksum validation at registration (SEC-01, SEC-03)
+- [ ] 02-03-PLAN.md — Server-side file type validation on upload (SEC-02)
 
 ## Progress
 
@@ -53,4 +58,4 @@ Phases execute in numeric order: 1 → 2
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Core Platform | 3/3 | Complete | 2026-02-26 |
-| 2. Export & Security | 0/TBD | Not started | - |
+| 2. Export & Security | 0/3 | Not started | - |
