@@ -25,13 +25,13 @@
 
 ### Export
 
-- [ ] **EXPORT-01**: Usuario puede exportar datos de facturas extraídas a CSV compatible con sistemas contables (ej. Memory Conty)
+- [x] **EXPORT-01**: Usuario puede exportar datos de facturas extraídas a CSV compatible con sistemas contables (ej. Memory Conty)
 
 ### Security
 
-- [ ] **SEC-01**: Endpoint PATCH `/api/invoices/[id]` valida que la factura pertenece a la empresa del usuario antes de permitir modificaciones
+- [x] **SEC-01**: Endpoint PATCH `/api/invoices/[id]` valida que la factura pertenece a la empresa del usuario antes de permitir modificaciones
 - [x] **SEC-02**: Validación de tipo de archivo se realiza en el servidor (no solo en el cliente) antes de enviar a OpenAI
-- [ ] **SEC-03**: RUT de empresa es validado con checksum al momento del registro
+- [x] **SEC-03**: RUT de empresa es validado con checksum al momento del registro
 
 ## v2 Requirements
 
@@ -72,10 +72,10 @@
 | EXTRACT-03 | Phase 1 | Complete |
 | DASH-01 | Phase 1 | Complete |
 | REVIEW-01 | Phase 1 | Complete |
-| EXPORT-01 | Phase 2 | Pending |
-| SEC-01 | Phase 2 | Pending |
+| EXPORT-01 | Phase 2 | Complete |
+| SEC-01 | Phase 2 | Complete |
 | SEC-02 | Phase 2 | Complete |
-| SEC-03 | Phase 2 | Pending |
+| SEC-03 | Phase 2 | Complete |
 
 **Coverage:**
 - v1 requirements: 12 total
