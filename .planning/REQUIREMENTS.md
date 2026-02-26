@@ -30,7 +30,7 @@
 ### Security
 
 - [ ] **SEC-01**: Endpoint PATCH `/api/invoices/[id]` valida que la factura pertenece a la empresa del usuario antes de permitir modificaciones
-- [ ] **SEC-02**: Validación de tipo de archivo se realiza en el servidor (no solo en el cliente) antes de enviar a OpenAI
+- [x] **SEC-02**: Validación de tipo de archivo se realiza en el servidor (no solo en el cliente) antes de enviar a OpenAI
 - [ ] **SEC-03**: RUT de empresa es validado con checksum al momento del registro
 
 ## v2 Requirements
@@ -74,7 +74,7 @@
 | REVIEW-01 | Phase 1 | Complete |
 | EXPORT-01 | Phase 2 | Pending |
 | SEC-01 | Phase 2 | Pending |
-| SEC-02 | Phase 2 | Pending |
+| SEC-02 | Phase 2 | Complete |
 | SEC-03 | Phase 2 | Pending |
 
 **Coverage:**

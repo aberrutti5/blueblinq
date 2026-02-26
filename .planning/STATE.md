@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 2 of 2 (Export & Security)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-26 — Roadmap created; Phase 1 validated as complete
+Plan: 3 of TBD in current phase
+Status: In progress
+Last activity: 2026-02-26 — Completed plan 02-03: server-side MIME type validation (SEC-02)
 
-Progress: [█████░░░░░] 50%
+Progress: [██████░░░░] 60%
 
 ## Performance Metrics
 
@@ -28,7 +28,7 @@ Progress: [█████░░░░░] 50%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 1. Core Platform | 3/3 | - | - |
-| 2. Export & Security | 0/TBD | - | - |
+| 2. Export & Security | 3/TBD | ~2min | ~2min |
 
 **Recent Trend:**
 - Last 5 plans: N/A
@@ -46,6 +46,8 @@ Recent decisions affecting current work:
 - [Pre-GSD]: Base64 in DB for file storage — MVP approach, scales to S3 in v2
 - [Pre-GSD]: GPT-4o Vision for extraction — handles heterogeneous invoice formats
 - [Pre-GSD]: NextAuth credentials provider — sufficient for v1
+- [02-03]: Module-level ALLOWED_TYPES const in POST /api/invoices — avoids recreating on every request, easy to extend
+- [02-03]: Validate file.type (server-reported MIME from multipart Content-Type) before any file processing or OpenAI call
 
 ### Pending Todos
 
@@ -59,5 +61,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Roadmap created, Phase 2 ready to plan
+Stopped at: Completed 02-03-PLAN.md — server-side MIME type validation (SEC-02)
 Resume file: None

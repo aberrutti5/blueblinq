@@ -13,7 +13,7 @@ The core invoice extraction platform is already built and validated. Phase 1 cov
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Core Platform** - Authentication, invoice upload + AI extraction, IVA classification, dashboard, and review workflow — fully implemented
-- [ ] **Phase 2: Export & Security** - CSV export for accountants and security hardening before production launch
+- [x] **Phase 2: Export & Security** - CSV export for accountants and security hardening before production launch (completed 2026-02-26)
 
 ## Phase Details
 
@@ -58,4 +58,4 @@ Phases execute in numeric order: 1 → 2
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Core Platform | 3/3 | Complete | 2026-02-26 |
-| 2. Export & Security | 0/3 | Not started | - |
+| 2. Export & Security | 3/3 | Complete   | 2026-02-26 |
