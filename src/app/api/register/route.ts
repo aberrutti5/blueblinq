@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { validateRut } from "@/lib/tax/rut-validator";
 
 const registerSchema = z.object({
   name: z.string().min(2),
@@ -15,6 +16,14 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
     const data = registerSchema.parse(body);
+
+    const rutValidation = validateRut(data.companyRut);
+    if (!rutValidation.valid) {
+      return NextResponse.json(
+        { error: "RUT de empresa inválido" },
+        { status: 400 }
+      );
+    }
 
     const existingUser = await db.user.findUnique({
       where: { email: data.email },
@@ -40,7 +49,7 @@ export async function POST(req: NextRequest) {
     const company = await db.company.create({
       data: {
         name: data.companyName,
-        rut: data.companyRut,
+        rut: rutValidation.clean,
       },
     });
 
