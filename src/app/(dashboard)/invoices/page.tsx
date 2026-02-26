@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Upload, Eye } from "lucide-react";
+import { Upload, Eye, Download } from "lucide-react";
 
 interface InvoiceSummary {
   id: string;
@@ -63,12 +63,20 @@ export default function InvoicesPage() {
             Todas las facturas procesadas por IA
           </p>
         </div>
-        <Link href="/invoices/upload">
-          <Button>
-            <Upload className="h-4 w-4 mr-2" />
-            Subir factura
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <a href="/api/invoices/export" download>
+            <Button variant="outline">
+              <Download className="h-4 w-4 mr-2" />
+              Exportar CSV
+            </Button>
+          </a>
+          <Link href="/invoices/upload">
+            <Button>
+              <Upload className="h-4 w-4 mr-2" />
+              Subir factura
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <Card>
