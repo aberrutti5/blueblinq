@@ -6,6 +6,13 @@ import { extractInvoiceFromBase64 } from "@/lib/ai/extract-invoice";
 import { classifyIva, calculateIvaAmount } from "@/lib/tax/iva-classifier";
 import { validateRut } from "@/lib/tax/rut-validator";
 
+const ALLOWED_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "application/pdf",
+] as const;
+
 async function getUserCompanyId(userId: string): Promise<string | null> {
   const membership = await db.companyMembership.findFirst({
     where: { userId, isDefault: true },
@@ -69,6 +76,13 @@ export async function POST(req: NextRequest) {
     if (!file) {
       return NextResponse.json(
         { error: "No se proporcionó archivo" },
+        { status: 400 }
+      );
+    }
+
+    if (!ALLOWED_TYPES.includes(file.type as (typeof ALLOWED_TYPES)[number])) {
+      return NextResponse.json(
+        { error: "Tipo de archivo no permitido. Usá JPG, PNG, WebP o PDF." },
         { status: 400 }
       );
     }
