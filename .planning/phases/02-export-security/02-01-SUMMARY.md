@@ -93,6 +93,14 @@ None - no external service configuration required.
 - EXPORT-01 requirement fulfilled; CSV export is production-ready for authenticated users
 - Remaining Phase 2 work: SEC-01 (multi-tenancy audit) and SEC-02 (file upload security) — both production blockers noted in STATE.md
 
+## Self-Check: PASSED
+
+- FOUND: src/app/api/invoices/export/route.ts
+- FOUND: src/app/(dashboard)/invoices/page.tsx
+- FOUND: .planning/phases/02-export-security/02-01-SUMMARY.md
+- FOUND: commit b62f565 (feat: create export endpoint)
+- FOUND: commit fc8ed15 (feat: add export button)
+
 ---
 *Phase: 02-export-security*
 *Completed: 2026-02-26*
