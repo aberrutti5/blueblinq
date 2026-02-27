@@ -1,4 +1,4 @@
-# FacturAI
+# BlueBlinq
 
 Automatización de facturas con IA para empresas uruguayas. Extrae datos de facturas usando GPT-4o Vision y clasifica automáticamente el IVA según la normativa de Uruguay.
 

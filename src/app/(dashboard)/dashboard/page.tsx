@@ -127,7 +127,7 @@ export default function DashboardPage() {
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Upload className="h-16 w-16 text-gray-300 mb-4" />
             <h2 className="text-xl font-semibold mb-2">
-              Bienvenido a FacturAI
+              Bienvenido a BlueBlinq
             </h2>
             <p className="text-gray-500 mb-6 text-center max-w-md">
               Subí tu primera factura y la IA extraerá automáticamente todos los

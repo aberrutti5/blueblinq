@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { FileText, Upload, Zap, Shield } from "lucide-react";
+import { Zap, Upload, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 px-4">
       <div className="text-center space-y-6 max-w-lg">
-        <FileText className="h-16 w-16 text-blue-600 mx-auto" />
-        <h1 className="text-4xl font-bold">FacturAI</h1>
+        <Zap className="h-16 w-16 text-blue-600 mx-auto" />
+        <h1 className="text-4xl font-bold">BlueBlinq</h1>
         <p className="text-gray-600 text-lg">
           Automatizá la extracción y clasificación de tus facturas con
           inteligencia artificial.

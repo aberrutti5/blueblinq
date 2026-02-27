@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { FileText } from "lucide-react";
+import { Zap } from "lucide-react";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -54,7 +54,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-2">
-            <FileText className="h-10 w-10 text-blue-600" />
+            <Zap className="h-10 w-10 text-blue-600" />
           </div>
           <CardTitle className="text-2xl">Crear cuenta</CardTitle>
           <CardDescription>

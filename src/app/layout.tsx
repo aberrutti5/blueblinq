@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FacturAI - Automatización de Facturas con IA",
+  title: "BlueBlinq - Automatización de Facturas con IA",
   description:
     "Automatizá la extracción y clasificación de tus facturas con inteligencia artificial. IVA clasificado automáticamente según normativa uruguaya.",
 };

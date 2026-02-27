@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  FileText,
+  Zap,
   LayoutDashboard,
   Upload,
   List,
@@ -24,8 +24,8 @@ export function Sidebar() {
   return (
     <div className="flex h-screen w-64 flex-col border-r bg-white">
       <div className="flex h-16 items-center gap-2 border-b px-6">
-        <FileText className="h-6 w-6 text-blue-600" />
-        <span className="text-xl font-bold">FacturAI</span>
+        <Zap className="h-6 w-6 text-blue-600" />
+        <span className="text-xl font-bold">BlueBlinq</span>
       </div>
 
       <nav className="flex-1 space-y-1 p-4">
