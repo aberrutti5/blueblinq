@@ -124,3 +124,41 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ── BlueBlinq Landing Page ─────────────────────────────── */
+
+.bb-landing {
+  background-color: #040810;
+  font-family: 'Funnel Sans', sans-serif;
+}
+
+@keyframes bb-bolt-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bb-glow-pulse {
+  0%, 100% { opacity: 0.85; }
+  50%       { opacity: 1; }
+}
+
+.bb-bolt-line {
+  animation: bb-bolt-in 0.5s ease both;
+}
+.bb-bolt-line:nth-child(1) { animation-delay: 0.05s; }
+.bb-bolt-line:nth-child(2) { animation-delay: 0.15s; }
+.bb-bolt-line:nth-child(3) { animation-delay: 0.25s; }
+.bb-bolt-line:nth-child(4) { animation-delay: 0.38s; }
+.bb-bolt-line:nth-child(5) { animation-delay: 0.50s; }
+
+.bb-bolt-line:hover {
+  animation: bb-glow-pulse 1.5s ease infinite;
+  filter: brightness(1.15);
+  cursor: default;
+}
