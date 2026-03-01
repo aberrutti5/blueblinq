@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls \"src/app/\\(auth\\)/\")",
+      "Bash(ls \"src/app/\\(dashboard\\)/\")"
+    ]
+  }
+}

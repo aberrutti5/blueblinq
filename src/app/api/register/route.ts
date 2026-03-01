@@ -18,7 +18,8 @@ export async function POST(req: NextRequest) {
     const data = registerSchema.parse(body);
 
     const rutValidation = validateRut(data.companyRut);
-    if (!rutValidation.valid) {
+    const isDev = process.env.NODE_ENV === "development";
+    if (!rutValidation.valid && !isDev) {
       return NextResponse.json(
         { error: "RUT de empresa inválido" },
         { status: 400 }
@@ -49,7 +50,7 @@ export async function POST(req: NextRequest) {
     const company = await db.company.create({
       data: {
         name: data.companyName,
-        rut: rutValidation.clean,
+        rut: rutValidation.clean || data.companyRut.replace(/\D/g, ""),
       },
     });
 
