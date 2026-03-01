@@ -81,9 +81,10 @@ export default function Home() {
       </nav>
 
       {/* ── Hero ─────────────────────────────────── */}
-      {/* flex-1 makes it fill the remaining viewport height */}
-      <section className="relative z-10 flex flex-1 min-h-0">
-
+      <section
+        className="relative z-10 flex overflow-hidden"
+        style={{ minHeight: "calc(100vh - 80px)" }}
+      >
         {/* Left: content */}
         <div className="flex flex-col justify-center px-8 lg:px-16 py-16 w-full lg:w-[52%] shrink-0">
           <h1
@@ -95,12 +96,7 @@ export default function Home() {
             }}
           >
             Tus facturas,{" "}
-            <span
-              style={{
-                color: "#5B8AF7",
-                textShadow: "0 0 40px #5B8AF750",
-              }}
-            >
+            <span style={{ color: "#5B8AF7", textShadow: "0 0 40px #5B8AF750" }}>
               procesadas
               <br />
               al instante.
@@ -144,32 +140,30 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Right: full-height image */}
-        <div className="hidden lg:block relative flex-1 overflow-hidden">
-          <Image
-            src="/hero.webp"
-            alt="Velocidad y precisión — BlueBlinq"
-            fill
-            sizes="48vw"
-            className="object-cover object-center"
-            priority
-          />
-          {/* Fade left edge into background */}
+        {/* Right: image via CSS background (más confiable que next/image con fill) */}
+        <div
+          aria-hidden
+          className="hidden lg:block absolute right-0 top-0 bottom-0"
+          style={{
+            width: "52%",
+            backgroundImage: "url('/hero.webp')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          {/* Fade izquierda */}
           <div
-            aria-hidden
-            className="absolute inset-0 pointer-events-none"
+            className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to right, #040810 0%, rgba(4,8,16,0.5) 35%, transparent 65%)",
+                "linear-gradient(to right, #040810 0%, rgba(4,8,16,0.6) 30%, transparent 60%)",
             }}
           />
-          {/* Fade bottom edge */}
+          {/* Fade abajo */}
           <div
-            aria-hidden
-            className="absolute inset-0 pointer-events-none"
+            className="absolute inset-0"
             style={{
-              background:
-                "linear-gradient(to top, #040810 0%, transparent 20%)",
+              background: "linear-gradient(to top, #040810 0%, transparent 25%)",
             }}
           />
         </div>
