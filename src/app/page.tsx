@@ -54,7 +54,7 @@ export default function Home() {
       </svg>
 
       {/* ── Nav ──────────────────────────────────── */}
-      <nav className="relative z-10 flex items-center justify-between px-8 py-6 max-w-6xl mx-auto w-full shrink-0">
+      <nav className="relative z-10 flex items-center justify-between px-8 lg:px-16 py-6 max-w-7xl mx-auto w-full shrink-0">
         <span
           className="text-lg tracking-tight"
           style={{ fontFamily: "'Funnel Sans', sans-serif", fontWeight: 700, color: "#3F6EE8" }}
@@ -82,11 +82,14 @@ export default function Home() {
 
       {/* ── Hero ─────────────────────────────────── */}
       <section
-        className="relative z-10 flex overflow-hidden"
+        className="relative z-10 overflow-hidden"
         style={{ minHeight: "calc(100vh - 80px)" }}
       >
-        {/* Left: content */}
-        <div className="flex flex-col justify-center px-8 lg:px-16 py-16 w-full lg:w-[52%] shrink-0">
+        {/* Left: content — max-w-7xl matches nav so logo & text align */}
+        <div
+          className="relative z-10 max-w-7xl mx-auto px-8 lg:px-16 flex flex-col justify-center py-16"
+          style={{ minHeight: "calc(100vh - 80px)" }}
+        >
           <h1
             className="mb-6 leading-[1.08] tracking-tight"
             style={{
@@ -95,11 +98,11 @@ export default function Home() {
               fontSize: "clamp(2.4rem, 5vw, 4rem)",
             }}
           >
-            Tus facturas,{" "}
+            Facturación inteligente{" "}
             <span style={{ color: "#5B8AF7", textShadow: "0 0 40px #5B8AF750" }}>
-              procesadas
+              para tu
               <br />
-              al instante.
+              negocio.
             </span>
           </h1>
 
@@ -109,7 +112,8 @@ export default function Home() {
           >
             Cargá tus facturas y dejá que BlueBlinq extraiga{" "}
             <span style={{ color: "#7AA3F8" }}>emisor, RUT, montos e IVA</span>{" "}
-            automáticamente. Exportá directo a tu sistema contable.
+            automáticamente. Exportá directo a tu sistema contable.{" "}
+            Todo personalizado a la medida de tu negocio.
           </p>
 
           <p
@@ -146,17 +150,17 @@ export default function Home() {
           className="hidden lg:block absolute right-0 top-0 bottom-0"
           style={{
             width: "52%",
-            backgroundImage: "url('/hero.webp')",
+            backgroundImage: "url('/hero2.webp')",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         >
-          {/* Fade izquierda */}
+          {/* Fade izquierda — gradiente amplio para transición suave */}
           <div
             className="absolute inset-0"
             style={{
               background:
-                "linear-gradient(to right, #040810 0%, rgba(4,8,16,0.6) 30%, transparent 60%)",
+                "linear-gradient(to right, #040810 0%, rgba(4,8,16,0.85) 20%, rgba(4,8,16,0.4) 50%, transparent 80%)",
             }}
           />
           {/* Fade abajo */}
@@ -171,8 +175,8 @@ export default function Home() {
       </section>
 
       {/* ── Features ─────────────────────────────── */}
-      <section className="relative z-10 border-t border-white/[0.06] px-8 py-20 shrink-0">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10">
+      <section className="relative z-10 border-t border-white/[0.06] px-8 lg:px-16 py-20 shrink-0">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-10">
           {features.map((f, i) => (
             <div key={i} className="flex flex-col gap-3">
               <div className="w-8 h-8 flex items-center justify-center">
@@ -196,8 +200,8 @@ export default function Home() {
       </section>
 
       {/* ── Footer ───────────────────────────────── */}
-      <footer className="relative z-10 border-t border-white/[0.06] px-8 py-8 shrink-0">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
+      <footer className="relative z-10 border-t border-white/[0.06] px-8 lg:px-16 py-8 shrink-0">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
           <span
             className="text-sm"
             style={{ fontFamily: "'Funnel Sans', sans-serif", fontWeight: 700, color: "#3F6EE8" }}
