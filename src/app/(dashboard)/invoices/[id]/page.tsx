@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -30,6 +29,9 @@ import {
   Hash,
   DollarSign,
   Loader2,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
 } from "lucide-react";
 
 interface InvoiceData {
@@ -72,12 +74,18 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   ERROR: { label: "Error", color: "bg-red-100 text-red-800" },
 };
 
+const ZOOM_LEVELS = [0.5, 0.75, 1, 1.25, 1.5, 2, 2.5, 3];
+
 export default function InvoiceDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [invoice, setInvoice] = useState<InvoiceData | null>(null);
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [isDragging, setIsDragging] = useState(false);
+  const imageContainerRef = useRef<HTMLDivElement>(null);
+  const dragStart = useRef({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 });
 
   useEffect(() => {
     let active = true;
@@ -133,6 +141,64 @@ export default function InvoiceDetailPage() {
     }
   };
 
+  const handleZoomIn = () => {
+    setZoomLevel((prev) => {
+      const idx = ZOOM_LEVELS.indexOf(prev);
+      return idx < ZOOM_LEVELS.length - 1 ? ZOOM_LEVELS[idx + 1] : prev;
+    });
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel((prev) => {
+      const idx = ZOOM_LEVELS.indexOf(prev);
+      return idx > 0 ? ZOOM_LEVELS[idx - 1] : prev;
+    });
+  };
+
+  const handleZoomReset = () => setZoomLevel(1);
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      if (e.deltaY < 0) {
+        setZoomLevel((prev) => {
+          const idx = ZOOM_LEVELS.indexOf(prev);
+          return idx < ZOOM_LEVELS.length - 1 ? ZOOM_LEVELS[idx + 1] : prev;
+        });
+      } else {
+        setZoomLevel((prev) => {
+          const idx = ZOOM_LEVELS.indexOf(prev);
+          return idx > 0 ? ZOOM_LEVELS[idx - 1] : prev;
+        });
+      }
+    }
+  }, []);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoomLevel <= 1) return;
+    const container = imageContainerRef.current;
+    if (!container) return;
+    setIsDragging(true);
+    dragStart.current = {
+      x: e.clientX,
+      y: e.clientY,
+      scrollLeft: container.scrollLeft,
+      scrollTop: container.scrollTop,
+    };
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return;
+    const container = imageContainerRef.current;
+    if (!container) return;
+    const dx = e.clientX - dragStart.current.x;
+    const dy = e.clientY - dragStart.current.y;
+    container.scrollLeft = dragStart.current.scrollLeft - dx;
+    container.scrollTop = dragStart.current.scrollTop - dy;
+  };
+
+  const handleMouseUp = () => setIsDragging(false);
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -149,7 +215,7 @@ export default function InvoiceDetailPage() {
   const statusInfo = statusLabels[invoice.status] ?? statusLabels.PENDING;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -195,7 +261,10 @@ export default function InvoiceDetailPage() {
           <Loader2 className="h-5 w-5 animate-spin" />
           <div>
             <p className="font-medium">Procesando factura...</p>
-            <p className="text-sm">La IA está extrayendo los datos. Esto se actualiza automáticamente.</p>
+            <p className="text-sm">
+              La IA está extrayendo los datos. Esto se actualiza
+              automáticamente.
+            </p>
           </div>
         </div>
       )}
@@ -208,196 +277,222 @@ export default function InvoiceDetailPage() {
         </div>
       )}
 
-      {/* Two column layout: Image + Data */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Original document */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Documento original</CardTitle>
+      {/* Metadata bar */}
+      <Card>
+        <CardContent className="py-3">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+            <div className="flex items-center gap-1.5">
+              <Building2 className="h-4 w-4 text-gray-400" />
+              <span className="text-gray-500">Proveedor:</span>
+              <span className="font-medium">
+                {invoice.vendorName ?? "—"}
+              </span>
+              {invoice.vendorRut && (
+                <span className="text-gray-400 text-xs">
+                  ({invoice.vendorRut})
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Calendar className="h-4 w-4 text-gray-400" />
+              <span className="text-gray-500">Fecha:</span>
+              <span className="font-medium">
+                {invoice.invoiceDate
+                  ? new Date(invoice.invoiceDate).toLocaleDateString("es-UY")
+                  : "—"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Hash className="h-4 w-4 text-gray-400" />
+              <span className="text-gray-500">Tipo:</span>
+              <span className="font-medium">
+                {invoice.invoiceType?.replace("_", " ") ?? "—"}{" "}
+                {invoice.invoiceNumber ?? ""}
+              </span>
+            </div>
+            <div className="h-4 border-l border-gray-200" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-gray-500">Subtotal:</span>
+              <span className="font-medium">
+                {invoice.subtotal
+                  ? Number(invoice.subtotal).toLocaleString("es-UY", {
+                      minimumFractionDigits: 2,
+                    })
+                  : "—"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-gray-500">IVA:</span>
+              <span className="font-medium">
+                {invoice.totalIva
+                  ? Number(invoice.totalIva).toLocaleString("es-UY", {
+                      minimumFractionDigits: 2,
+                    })
+                  : "—"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <DollarSign className="h-4 w-4 text-gray-400" />
+              <span className="text-gray-500">Total:</span>
+              <span className="font-bold text-base">
+                {invoice.currency}{" "}
+                {invoice.totalAmount
+                  ? Number(invoice.totalAmount).toLocaleString("es-UY", {
+                      minimumFractionDigits: 2,
+                    })
+                  : "—"}
+              </span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Main comparison: Image + Line Items side by side */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Invoice image with zoom */}
+        <Card className="flex flex-col">
+          <CardHeader className="py-3 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-sm font-medium">
+              Documento original
+            </CardTitle>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                onClick={handleZoomOut}
+                disabled={zoomLevel <= ZOOM_LEVELS[0]}
+              >
+                <ZoomOut className="h-3.5 w-3.5" />
+              </Button>
+              <span className="text-xs text-gray-500 w-12 text-center tabular-nums">
+                {Math.round(zoomLevel * 100)}%
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-7 w-7"
+                onClick={handleZoomIn}
+                disabled={zoomLevel >= ZOOM_LEVELS[ZOOM_LEVELS.length - 1]}
+              >
+                <ZoomIn className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={handleZoomReset}
+              >
+                <RotateCcw className="h-3.5 w-3.5" />
+              </Button>
+            </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 p-0">
             {invoice.fileType.startsWith("image/") ? (
-              <img
-                src={invoice.fileUrl}
-                alt="Factura"
-                className="rounded-lg w-full object-contain max-h-[600px]"
-              />
+              <div
+                ref={imageContainerRef}
+                className="overflow-auto max-h-[70vh] border-t"
+                style={{
+                  cursor:
+                    zoomLevel > 1
+                      ? isDragging
+                        ? "grabbing"
+                        : "grab"
+                      : "default",
+                }}
+                onWheel={handleWheel}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+              >
+                <img
+                  src={invoice.fileUrl}
+                  alt="Factura"
+                  className="w-full select-none"
+                  style={{
+                    transform: `scale(${zoomLevel})`,
+                    transformOrigin: "top left",
+                    width: `${100 * zoomLevel}%`,
+                  }}
+                  draggable={false}
+                />
+              </div>
             ) : (
-              <div className="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
-                <p className="text-gray-500">
-                  PDF: {invoice.fileName}
-                </p>
+              <div className="flex items-center justify-center h-64 bg-gray-100 border-t">
+                <p className="text-gray-500">PDF: {invoice.fileName}</p>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Extracted data */}
-        <div className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Datos extraídos</CardTitle>
-              <CardDescription>
-                Información extraída automáticamente por IA
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex items-start gap-2">
-                  <Building2 className="h-4 w-4 mt-1 text-gray-400" />
-                  <div>
-                    <p className="text-xs text-gray-500">Proveedor</p>
-                    <p className="font-medium">
-                      {invoice.vendorName ?? "—"}
-                    </p>
-                    {invoice.vendorRut && (
-                      <p className="text-xs text-gray-500">
-                        RUT: {invoice.vendorRut}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Calendar className="h-4 w-4 mt-1 text-gray-400" />
-                  <div>
-                    <p className="text-xs text-gray-500">Fecha</p>
-                    <p className="font-medium">
-                      {invoice.invoiceDate
-                        ? new Date(invoice.invoiceDate).toLocaleDateString(
-                            "es-UY"
-                          )
-                        : "—"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Hash className="h-4 w-4 mt-1 text-gray-400" />
-                  <div>
-                    <p className="text-xs text-gray-500">Tipo / Número</p>
-                    <p className="font-medium">
-                      {invoice.invoiceType?.replace("_", " ") ?? "—"}{" "}
-                      {invoice.invoiceNumber ?? ""}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-2">
-                  <DollarSign className="h-4 w-4 mt-1 text-gray-400" />
-                  <div>
-                    <p className="text-xs text-gray-500">Total</p>
-                    <p className="text-xl font-bold">
-                      {invoice.currency}{" "}
-                      {invoice.totalAmount
-                        ? Number(invoice.totalAmount).toLocaleString("es-UY", {
-                            minimumFractionDigits: 2,
-                          })
-                        : "—"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Totals breakdown */}
-              <div className="border-t pt-3 space-y-1 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-500">Subtotal</span>
-                  <span>
-                    {invoice.subtotal
-                      ? Number(invoice.subtotal).toLocaleString("es-UY", {
-                          minimumFractionDigits: 2,
-                        })
-                      : "—"}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-500">IVA Total</span>
-                  <span>
-                    {invoice.totalIva
-                      ? Number(invoice.totalIva).toLocaleString("es-UY", {
-                          minimumFractionDigits: 2,
-                        })
-                      : "—"}
-                  </span>
-                </div>
-                <div className="flex justify-between font-bold">
-                  <span>Total</span>
-                  <span>
-                    {invoice.totalAmount
-                      ? Number(invoice.totalAmount).toLocaleString("es-UY", {
-                          minimumFractionDigits: 2,
-                        })
-                      : "—"}
-                  </span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      {/* Line items table */}
-      {invoice.lineItems.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">
-              Productos / Servicios ({invoice.lineItems.length} ítems)
+        {/* Line items table */}
+        <Card className="flex flex-col">
+          <CardHeader className="py-3">
+            <CardTitle className="text-sm font-medium">
+              Productos / Servicios
+              {invoice.lineItems.length > 0 && (
+                <span className="text-gray-400 font-normal ml-1">
+                  ({invoice.lineItems.length})
+                </span>
+              )}
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-8">#</TableHead>
-                  <TableHead>Descripción</TableHead>
-                  <TableHead className="text-right">Cant.</TableHead>
-                  <TableHead className="text-right">P. Unit.</TableHead>
-                  <TableHead className="text-right">Total línea</TableHead>
-                  <TableHead>IVA</TableHead>
-                  <TableHead className="text-right">Monto IVA</TableHead>
-                  <TableHead>Clasif.</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {invoice.lineItems.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="text-gray-400">
-                      {item.lineNumber}
-                    </TableCell>
-                    <TableCell className="font-medium max-w-xs truncate">
-                      {item.description}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {Number(item.quantity)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {Number(item.unitPrice).toLocaleString("es-UY", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </TableCell>
-                    <TableCell className="text-right font-medium">
-                      {Number(item.lineTotal).toLocaleString("es-UY", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      <IvaBadge category={item.ivaCategory} />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {Number(item.ivaAmount).toLocaleString("es-UY", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {item.classifiedBy}
-                      </Badge>
-                    </TableCell>
+          <CardContent className="flex-1 p-0 overflow-auto max-h-[70vh] border-t">
+            {invoice.lineItems.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-8 text-xs">#</TableHead>
+                    <TableHead className="text-xs">Descripción</TableHead>
+                    <TableHead className="text-right text-xs">Cant.</TableHead>
+                    <TableHead className="text-right text-xs">
+                      P. Unit.
+                    </TableHead>
+                    <TableHead className="text-right text-xs">Total</TableHead>
+                    <TableHead className="text-xs">IVA</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {invoice.lineItems.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell className="text-gray-400 text-xs py-2">
+                        {item.lineNumber}
+                      </TableCell>
+                      <TableCell
+                        className="text-xs py-2 max-w-[200px] truncate"
+                        title={item.description}
+                      >
+                        {item.description}
+                      </TableCell>
+                      <TableCell className="text-right text-xs py-2">
+                        {Number(item.quantity)}
+                      </TableCell>
+                      <TableCell className="text-right text-xs py-2">
+                        {Number(item.unitPrice).toLocaleString("es-UY", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </TableCell>
+                      <TableCell className="text-right text-xs py-2 font-medium">
+                        {Number(item.lineTotal).toLocaleString("es-UY", {
+                          minimumFractionDigits: 2,
+                        })}
+                      </TableCell>
+                      <TableCell className="py-2">
+                        <IvaBadge category={item.ivaCategory} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <div className="flex items-center justify-center h-32 text-gray-400 text-sm">
+                Sin productos extraídos
+              </div>
+            )}
           </CardContent>
         </Card>
-      )}
+      </div>
     </div>
   );
 }
