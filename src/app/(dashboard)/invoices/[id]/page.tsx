@@ -80,10 +80,33 @@ export default function InvoiceDetailPage() {
   const [approving, setApproving] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/invoices/${params.id}`)
-      .then((res) => res.json())
-      .then(setInvoice)
-      .finally(() => setLoading(false));
+    let active = true;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
+    const fetchInvoice = async () => {
+      const res = await fetch(`/api/invoices/${params.id}`);
+      const data = await res.json();
+      if (active) {
+        setInvoice(data);
+        setLoading(false);
+      }
+      return data;
+    };
+
+    fetchInvoice().then((data) => {
+      if (!active || data?.status !== "PROCESSING") return;
+      intervalId = setInterval(async () => {
+        const updated = await fetchInvoice();
+        if (!active || updated?.status !== "PROCESSING") {
+          if (intervalId) clearInterval(intervalId);
+        }
+      }, 2000);
+    });
+
+    return () => {
+      active = false;
+      if (intervalId) clearInterval(intervalId);
+    };
   }, [params.id]);
 
   const handleApprove = async () => {
@@ -165,6 +188,17 @@ export default function InvoiceDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Processing indicator */}
+      {invoice.status === "PROCESSING" && (
+        <div className="bg-blue-50 text-blue-700 p-4 rounded-md flex items-center gap-3">
+          <Loader2 className="h-5 w-5 animate-spin" />
+          <div>
+            <p className="font-medium">Procesando factura...</p>
+            <p className="text-sm">La IA está extrayendo los datos. Esto se actualiza automáticamente.</p>
+          </div>
+        </div>
+      )}
 
       {/* Error */}
       {invoice.extractionError && (

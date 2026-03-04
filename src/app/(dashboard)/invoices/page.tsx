@@ -48,10 +48,36 @@ export default function InvoicesPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/invoices")
-      .then((res) => res.json())
-      .then((data) => setInvoices(data.invoices ?? []))
-      .finally(() => setLoading(false));
+    let active = true;
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+
+    const fetchInvoices = async () => {
+      const res = await fetch("/api/invoices");
+      const data = await res.json();
+      if (!active) return;
+
+      const list = data.invoices ?? [];
+      setInvoices(list);
+      setLoading(false);
+
+      const hasProcessing = list.some(
+        (inv: InvoiceSummary) => inv.status === "PROCESSING"
+      );
+
+      if (hasProcessing && !intervalId) {
+        intervalId = setInterval(fetchInvoices, 5000);
+      } else if (!hasProcessing && intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+
+    fetchInvoices();
+
+    return () => {
+      active = false;
+      if (intervalId) clearInterval(intervalId);
+    };
   }, []);
 
   return (

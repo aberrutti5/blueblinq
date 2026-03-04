@@ -2,9 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { extractInvoiceFromBase64 } from "@/lib/ai/extract-invoice";
-import { classifyIva, calculateIvaAmount } from "@/lib/tax/iva-classifier";
-import { validateRut } from "@/lib/tax/rut-validator";
+import { processInvoiceInBackground } from "@/lib/ai/process-invoice";
 
 const ALLOWED_TYPES = [
   "image/jpeg",
@@ -106,121 +104,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    try {
-      // Run AI extraction
-      const { result, raw } = await extractInvoiceFromBase64(
-        base64,
-        file.type
-      );
+    // Fire-and-forget: process in background
+    processInvoiceInBackground(invoice.id, base64, file.type, companyId);
 
-      // Classify IVA for each line item
-      const classifiedItems = await Promise.all(
-        result.lineItems.map(async (item, index) => {
-          const classification = await classifyIva(
-            item.description,
-            companyId,
-            item.ivaIndicator
-          );
-          const ivaAmount = calculateIvaAmount(
-            item.lineTotal,
-            classification.rate
-          );
-          return {
-            lineNumber: index + 1,
-            description: item.description,
-            quantity: item.quantity,
-            unitPrice: item.unitPrice,
-            lineTotal: item.lineTotal,
-            ivaCategory: classification.category,
-            ivaRate: classification.rate,
-            ivaAmount,
-            classifiedBy: classification.method,
-          };
-        })
-      );
-
-      // Match or create vendor
-      let vendorId: string | undefined;
-      if (result.vendor.rut) {
-        const rutValidation = validateRut(result.vendor.rut);
-        if (rutValidation.valid) {
-          const existingVendor = await db.vendor.findUnique({
-            where: {
-              companyId_rut: { companyId, rut: rutValidation.clean },
-            },
-          });
-
-          if (existingVendor) {
-            vendorId = existingVendor.id;
-          } else if (result.vendor.name) {
-            const newVendor = await db.vendor.create({
-              data: {
-                companyId,
-                name: result.vendor.name,
-                rut: rutValidation.clean,
-                address: result.vendor.address,
-              },
-            });
-            vendorId = newVendor.id;
-          }
-        }
-      }
-
-      // Update invoice with extracted data
-      await db.invoice.update({
-        where: { id: invoice.id },
-        data: {
-          status: "EXTRACTED",
-          extractionRaw: raw as object,
-          confidence: result.confidence,
-          invoiceType: result.invoiceType,
-          invoiceNumber: result.invoiceNumber,
-          invoiceDate: result.invoiceDate
-            ? new Date(result.invoiceDate)
-            : null,
-          dueDate: result.dueDate ? new Date(result.dueDate) : null,
-          vendorName: result.vendor.name,
-          vendorRut: result.vendor.rut,
-          vendorId,
-          currency: result.currency,
-          subtotal: result.subtotal,
-          totalIva: result.totalIva,
-          totalAmount: result.totalAmount,
-          lineItems: {
-            createMany: {
-              data: classifiedItems,
-            },
-          },
-        },
-      });
-
-      const updatedInvoice = await db.invoice.findUnique({
-        where: { id: invoice.id },
-        include: { lineItems: true },
-      });
-
-      return NextResponse.json(updatedInvoice, { status: 201 });
-    } catch (extractionError) {
-      // Mark as error if AI extraction fails
-      await db.invoice.update({
-        where: { id: invoice.id },
-        data: {
-          status: "ERROR",
-          extractionError:
-            extractionError instanceof Error
-              ? extractionError.message
-              : "Error desconocido en la extracción",
-        },
-      });
-
-      return NextResponse.json(
-        {
-          error: "Error en la extracción de datos",
-          invoiceId: invoice.id,
-        },
-        { status: 500 }
-      );
-    }
+    return NextResponse.json(invoice, { status: 201 });
   } catch (error) {
     console.error("Invoice upload error:", error);
     return NextResponse.json(
