@@ -11,7 +11,8 @@ export async function middleware(req: NextRequest) {
     pathname.startsWith("/login") ||
     pathname.startsWith("/register") ||
     pathname.startsWith("/api/auth") ||
-    pathname.startsWith("/api/register")
+    pathname.startsWith("/api/register") ||
+    pathname.startsWith("/facturas")
   ) {
     // Redirect to dashboard if already logged in
     if (token && (pathname === "/login" || pathname === "/register")) {

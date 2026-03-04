@@ -10,7 +10,7 @@ const features = [
   },
   {
     icon: Sparkles,
-    title: "IA extrae los datos",
+    title: "Extracción automática",
     description: "Emisor, RUT, montos e IVA identificados automáticamente.",
   },
   {
@@ -65,7 +65,7 @@ export default function Home() {
           <Link href="/login">
             <Button
               variant="ghost"
-              className="text-white/60 hover:text-white hover:bg-white/5 border border-white/0 hover:border-white/10"
+              className="text-white/60 hover:text-white hover:!bg-white/5 border border-white/0 hover:border-white/10"
             >
               Ingresar
             </Button>
@@ -107,7 +107,7 @@ export default function Home() {
             className="text-white/50 text-base sm:text-lg max-w-md mb-3 leading-relaxed"
             style={{ fontFamily: "'Funnel Sans', sans-serif", fontWeight: 300 }}
           >
-            Cargá tus facturas y dejá que la IA extraiga{" "}
+            Cargá tus facturas y dejá que BlueBlinq extraiga{" "}
             <span style={{ color: "#7AA3F8" }}>emisor, RUT, montos e IVA</span>{" "}
             automáticamente. Exportá directo a tu sistema contable.
           </p>
@@ -132,7 +132,7 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-white/15 text-white/75 hover:bg-white/5 hover:border-white/25 hover:text-white px-8"
+                className="!bg-transparent border-white/15 text-white/75 hover:!bg-white/5 hover:border-white/25 hover:text-white px-8"
               >
                 Ingresar
               </Button>
