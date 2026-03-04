@@ -19,6 +19,7 @@ const extractionSchema = z.object({
       "TICKET",
       "NOTA_CREDITO",
       "NOTA_DEBITO",
+      "RESGUARDO",
     ])
     .nullable(),
   invoiceNumber: z.string().nullable(),
