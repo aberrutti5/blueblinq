@@ -25,6 +25,7 @@ export default function RegisterPage() {
       body: JSON.stringify({
         name:        formData.get("name"),
         email:       formData.get("email"),
+        phone:       formData.get("phone"),
         password:    formData.get("password"),
         companyName: formData.get("companyName"),
         companyRut:  formData.get("companyRut"),
@@ -138,6 +139,25 @@ export default function RegisterPage() {
               name="email"
               type="email"
               placeholder="tu@empresa.com"
+              required
+              className="text-white placeholder:text-white/20 border-white/10 focus:border-[#2452CE] focus:ring-[#2452CE]/20"
+              style={{ backgroundColor: "rgba(255,255,255,0.05)" }}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label
+              htmlFor="phone"
+              className="text-white/60 text-xs"
+              style={{ fontFamily: "'Funnel Sans', sans-serif" }}
+            >
+              Celular
+            </Label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              placeholder="099 123 456"
               required
               className="text-white placeholder:text-white/20 border-white/10 focus:border-[#2452CE] focus:ring-[#2452CE]/20"
               style={{ backgroundColor: "rgba(255,255,255,0.05)" }}

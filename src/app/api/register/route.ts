@@ -7,6 +7,7 @@ import { validateRut } from "@/lib/tax/rut-validator";
 const registerSchema = z.object({
   name: z.string().min(2),
   email: z.string().email(),
+  phone: z.string().min(8).max(20),
   password: z.string().min(6),
   companyName: z.string().min(2),
   companyRut: z.string().min(12).max(12),
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
       data: {
         name: data.name,
         email: data.email,
+        phone: data.phone,
         passwordHash,
       },
     });
