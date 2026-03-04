@@ -22,8 +22,8 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen w-64 flex-col border-r bg-white">
-      <div className="flex h-16 items-center gap-2 border-b px-6">
+    <div className="flex h-screen w-48 flex-col border-r bg-white">
+      <div className="flex h-16 items-center gap-2 border-b px-4">
         <Zap className="h-6 w-6 text-blue-600" />
         <span className="text-xl font-bold">BlueBlinq</span>
       </div>
