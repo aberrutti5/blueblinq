@@ -153,14 +153,15 @@ export default function Home() {
             backgroundImage: "url('/hero2.webp')",
             backgroundSize: "cover",
             backgroundPosition: "center",
+            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 50%)",
+            maskImage: "linear-gradient(to right, transparent 0%, black 50%)",
           }}
         >
-          {/* Fade izquierda — gradiente amplio para transición suave */}
+          {/* Overlay oscuro izquierdo para legibilidad del título */}
           <div
             className="absolute inset-0"
             style={{
-              background:
-                "linear-gradient(to right, #040810 0%, rgba(4,8,16,0.85) 20%, rgba(4,8,16,0.4) 50%, transparent 80%)",
+              background: "linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.2) 40%, transparent 70%)",
             }}
           />
           {/* Fade abajo */}
