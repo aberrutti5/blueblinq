@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Upload,
   FileText,
@@ -26,63 +27,39 @@ interface DashboardStats {
 }
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<DashboardStats>({
-    total: 0,
-    extracted: 0,
-    approved: 0,
-    pending: 0,
-    errors: 0,
-  });
+  const [stats, setStats] = useState<DashboardStats | null>(null);
 
   useEffect(() => {
-    fetch("/api/invoices?limit=1000")
+    fetch("/api/invoices/stats")
       .then((res) => res.json())
-      .then((data) => {
-        const invoices = data.invoices ?? [];
-        setStats({
-          total: invoices.length,
-          extracted: invoices.filter(
-            (i: { status: string }) => i.status === "EXTRACTED"
-          ).length,
-          approved: invoices.filter(
-            (i: { status: string }) => i.status === "APPROVED"
-          ).length,
-          pending: invoices.filter(
-            (i: { status: string }) =>
-              i.status === "PENDING" || i.status === "PROCESSING"
-          ).length,
-          errors: invoices.filter(
-            (i: { status: string }) => i.status === "ERROR"
-          ).length,
-        });
-      });
+      .then((data) => setStats(data));
   }, []);
 
   const cards = [
     {
       title: "Total facturas",
-      value: stats.total,
+      value: stats?.total,
       icon: FileText,
       color: "text-blue-600",
       bg: "bg-blue-50",
     },
     {
       title: "Pendientes de revisión",
-      value: stats.extracted,
+      value: stats?.extracted,
       icon: Clock,
       color: "text-yellow-600",
       bg: "bg-yellow-50",
     },
     {
       title: "Aprobadas",
-      value: stats.approved,
+      value: stats?.approved,
       icon: CheckCircle2,
       color: "text-green-600",
       bg: "bg-green-50",
     },
     {
       title: "Errores",
-      value: stats.errors,
+      value: stats?.errors,
       icon: AlertCircle,
       color: "text-red-600",
       bg: "bg-red-50",
@@ -116,13 +93,17 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">{card.value}</p>
+              {stats === null ? (
+                <Skeleton className="h-9 w-12" />
+              ) : (
+                <p className="text-3xl font-bold">{card.value}</p>
+              )}
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {stats.total === 0 && (
+      {stats !== null && stats.total === 0 && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <Upload className="h-16 w-16 text-gray-300 mb-4" />

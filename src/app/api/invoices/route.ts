@@ -44,7 +44,18 @@ export async function GET(req: NextRequest) {
   const [invoices, total] = await Promise.all([
     db.invoice.findMany({
       where,
-      include: { lineItems: true },
+      select: {
+        id: true,
+        fileName: true,
+        status: true,
+        invoiceType: true,
+        invoiceNumber: true,
+        invoiceDate: true,
+        vendorName: true,
+        currency: true,
+        totalAmount: true,
+        createdAt: true,
+      },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * limit,
       take: limit,
