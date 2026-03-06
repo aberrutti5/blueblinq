@@ -38,10 +38,21 @@ export function getJobStatus(jobId: string): RpaJobResult | null {
   return jobResults.get(jobId) ?? null;
 }
 
+export function enqueueJobs(
+  invoiceIds: string[],
+  credentials: MemoryCredentials
+): string[] {
+  return invoiceIds.map((id) => enqueueJob(id, credentials));
+}
+
 export function getActiveJobs(): RpaJobResult[] {
   return Array.from(jobResults.values()).filter(
     (j) => j.status === "PENDING" || j.status === "RUNNING"
   );
+}
+
+export function getAllJobs(): RpaJobResult[] {
+  return Array.from(jobResults.values());
 }
 
 async function processQueue(): Promise<void> {
