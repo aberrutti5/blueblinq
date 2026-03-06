@@ -2,14 +2,12 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -30,8 +28,7 @@ export default function LoginPage() {
       setError("Email o contraseña incorrectos");
       setLoading(false);
     } else {
-      router.refresh();
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     }
   }
 
