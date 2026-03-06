@@ -98,3 +98,47 @@ export async function PATCH(
 
   return NextResponse.json(invoice);
 }
+
+const DELETABLE_STATUSES = ["EXTRACTED", "REVIEW", "APPROVED"];
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getServerSession(authOptions);
+  if (!session?.user) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+  }
+
+  const userId = (session.user as { id: string }).id;
+  const companyId = await getUserCompanyId(userId);
+  if (!companyId) {
+    return NextResponse.json({ error: "Sin empresa asociada" }, { status: 400 });
+  }
+
+  const { id } = await params;
+
+  const existing = await db.invoice.findUnique({
+    where: { id },
+    select: { companyId: true, status: true },
+  });
+
+  if (!existing) {
+    return NextResponse.json({ error: "Factura no encontrada" }, { status: 404 });
+  }
+
+  if (existing.companyId !== companyId) {
+    return NextResponse.json({ error: "No autorizado" }, { status: 403 });
+  }
+
+  if (!DELETABLE_STATUSES.includes(existing.status)) {
+    return NextResponse.json(
+      { error: `No se puede eliminar una factura en estado ${existing.status}` },
+      { status: 422 }
+    );
+  }
+
+  await db.invoice.delete({ where: { id } });
+
+  return new NextResponse(null, { status: 204 });
+}
