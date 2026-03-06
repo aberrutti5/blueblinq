@@ -1,38 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
+import { getCsrfToken } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [error, setError] = useState("");
+function LoginForm() {
+  const [csrfToken, setCsrfToken] = useState("");
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const urlError = searchParams.get("error");
+  const error = urlError ? "Email o contraseña incorrectos" : "";
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
-    const formData = new FormData(e.currentTarget);
-
-    const result = await signIn("credentials", {
-      email: formData.get("email") as string,
-      password: formData.get("password") as string,
-      redirect: false,
-    });
-
-    if (result?.error) {
-      setError("Email o contraseña incorrectos");
-      setLoading(false);
-    } else {
-      router.push("/dashboard");
-    }
-  }
+  useEffect(() => {
+    getCsrfToken().then((token) => setCsrfToken(token ?? ""));
+  }, []);
 
   return (
     <div
@@ -85,7 +70,16 @@ export default function LoginPage() {
           Accedé a tu cuenta de BlueBlinq
         </p>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Native HTML form POST — avoids iOS Safari cookie timing bug */}
+        <form
+          method="POST"
+          action="/api/auth/callback/credentials"
+          onSubmit={() => setLoading(true)}
+          className="space-y-5"
+        >
+          <input type="hidden" name="csrfToken" value={csrfToken} />
+          <input type="hidden" name="callbackUrl" value="/dashboard" />
+
           {error && (
             <div
               className="text-sm p-3 rounded-lg"
@@ -166,5 +160,13 @@ export default function LoginPage() {
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }

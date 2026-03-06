@@ -9,6 +9,7 @@ import {
   Upload,
   List,
   LogOut,
+  Settings,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
 
@@ -16,6 +17,7 @@ const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Facturas", href: "/invoices", icon: List },
   { name: "Subir factura", href: "/invoices/upload", icon: Upload },
+  { name: "Ajustes", href: "/settings", icon: Settings },
 ];
 
 export function Sidebar() {

@@ -63,6 +63,10 @@ model Company {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
+  // Memory RPA credentials (password stored AES-256-GCM encrypted)
+  memoryEmail             String?
+  memoryPasswordEncrypted String?
+
   memberships CompanyMembership[]
   invoices    Invoice[]
   vendors     Vendor[]
