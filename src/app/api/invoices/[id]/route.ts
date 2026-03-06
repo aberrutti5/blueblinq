@@ -12,7 +12,7 @@ async function getUserCompanyId(userId: string): Promise<string | null> {
 }
 
 export async function GET(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
@@ -99,10 +99,10 @@ export async function PATCH(
   return NextResponse.json(invoice);
 }
 
-const DELETABLE_STATUSES = ["EXTRACTED", "REVIEW", "APPROVED"];
+const DELETABLE_STATUSES = ["EXTRACTED", "REVIEW", "APPROVED", "ERROR"];
 
 export async function DELETE(
-  req: NextRequest,
+  _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);

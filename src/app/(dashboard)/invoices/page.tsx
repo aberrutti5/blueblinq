@@ -21,14 +21,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
   Upload,
   Eye,
   Download,
@@ -37,7 +29,6 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  Trash2,
 } from "lucide-react";
 
 function JobStatusIcon({ status }: { status: RpaJobResult["status"] }) {
@@ -85,8 +76,6 @@ export default function InvoicesPage() {
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState<string | null>(null);
   const [jobs, setJobs] = useState<RpaJobResult[]>([]);
-  const [deleteTarget, setDeleteTarget] = useState<InvoiceSummary | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
   const fetchInvoices = useCallback(async (): Promise<InvoiceSummary[]> => {
     const res = await fetch("/api/invoices");
@@ -182,24 +171,6 @@ export default function InvoicesPage() {
       await fetchJobs();
     }
   };
-
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-    setDeleting(true);
-    const res = await fetch(`/api/invoices/${deleteTarget.id}`, { method: "DELETE" });
-    setDeleting(false);
-    if (res.ok) {
-      setInvoices((prev) => prev.filter((inv) => inv.id !== deleteTarget.id));
-      setSelected((prev) => {
-        const next = new Set(prev);
-        next.delete(deleteTarget.id);
-        return next;
-      });
-      setDeleteTarget(null);
-    }
-  };
-
-  const DELETABLE_STATUSES = ["EXTRACTED", "REVIEW", "APPROVED"];
 
   const recentJobs = jobs.slice(-10).reverse();
   const activeJobCount = jobs.filter(
@@ -399,24 +370,12 @@ export default function InvoicesPage() {
                         <Badge className={st.color}>{st.label}</Badge>
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Link href={`/invoices/${inv.id}`}>
-                            <Button variant="ghost" size="sm">
-                              <Eye className="h-4 w-4 mr-1" />
-                              Ver
-                            </Button>
-                          </Link>
-                          {DELETABLE_STATUSES.includes(inv.status) && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                              onClick={() => setDeleteTarget(inv)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
+                        <Link href={`/invoices/${inv.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4 mr-1" />
+                            Ver
+                          </Button>
+                        </Link>
                       </TableCell>
                     </TableRow>
                   );
@@ -427,35 +386,6 @@ export default function InvoicesPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Eliminar factura</DialogTitle>
-            <DialogDescription>
-              ¿Seguro que querés eliminar{" "}
-              <span className="font-medium text-foreground">
-                {deleteTarget?.vendorName ?? deleteTarget?.fileName}
-              </span>
-              ?
-              {deleteTarget?.status === "APPROVED" && (
-                <span className="block mt-2 text-amber-600 text-sm">
-                  Esta factura ya está aprobada. Eliminándola se perderán los datos extraídos.
-                </span>
-              )}
-              <span className="block mt-1 text-sm">Esta acción no se puede deshacer.</span>
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
-              Cancelar
-            </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
-              {deleting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
-              Eliminar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
