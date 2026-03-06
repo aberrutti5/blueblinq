@@ -87,7 +87,7 @@ export default function Home() {
       >
         {/* Left: content — max-w-7xl matches nav so logo & text align */}
         <div
-          className="relative z-10 max-w-7xl mx-auto px-8 lg:px-16 flex flex-col justify-center py-16"
+          className="relative z-[1] max-w-7xl mx-auto px-8 lg:px-16 flex flex-col justify-center py-16"
           style={{ minHeight: "calc(100vh - 80px)" }}
         >
           <h1
@@ -147,30 +147,18 @@ export default function Home() {
         {/* Right: image via CSS background (más confiable que next/image con fill) */}
         <div
           aria-hidden
-          className="hidden lg:block absolute right-0 top-0 bottom-0"
+          className="hidden lg:block absolute right-0 top-0 bottom-0 z-0"
           style={{
             width: "52%",
             backgroundImage: "url('/hero2.webp')",
             backgroundSize: "cover",
             backgroundPosition: "center",
+            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 60%), linear-gradient(to top, transparent 0%, black 30%)",
+            maskImage: "linear-gradient(to right, transparent 0%, black 60%), linear-gradient(to top, transparent 0%, black 30%)",
+            WebkitMaskComposite: "destination-in",
+            maskComposite: "intersect",
           }}
-        >
-          {/* Fade izquierda — gradiente amplio para transición suave */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background:
-                "linear-gradient(to right, #040810 0%, rgba(4,8,16,0.85) 20%, rgba(4,8,16,0.4) 50%, transparent 80%)",
-            }}
-          />
-          {/* Fade abajo */}
-          <div
-            className="absolute inset-0"
-            style={{
-              background: "linear-gradient(to top, #040810 0%, transparent 25%)",
-            }}
-          />
-        </div>
+        />
 
       </section>
 
