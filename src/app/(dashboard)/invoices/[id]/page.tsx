@@ -51,6 +51,7 @@ export default async function InvoiceDetailPage({
       description: item.description,
       quantity: item.quantity.toString(),
       unitPrice: item.unitPrice.toString(),
+      discount: item.discount.toString(),
       lineTotal: item.lineTotal.toString(),
       ivaCategory: item.ivaCategory,
       ivaRate: item.ivaRate.toString(),

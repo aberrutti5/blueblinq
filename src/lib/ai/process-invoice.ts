@@ -30,6 +30,20 @@ async function processInvoice(
           companyId,
           item.ivaIndicator
         );
+
+        // Verify quantity: quantity * unitPrice * (1 - discount/100) should equal lineTotal
+        let verifiedQuantity = item.quantity;
+        const discount = item.discount ?? 0;
+        if (item.unitPrice > 0) {
+          const effectivePrice = item.unitPrice * (1 - discount / 100);
+          const expectedTotal = item.quantity * effectivePrice;
+          const tolerance = 0.02; // allow small rounding differences
+          if (Math.abs(expectedTotal - item.lineTotal) > tolerance) {
+            // Recalculate the correct quantity from lineTotal
+            verifiedQuantity = Math.round((item.lineTotal / effectivePrice) * 10000) / 10000;
+          }
+        }
+
         const ivaAmount = calculateIvaAmount(
           item.lineTotal,
           classification.rate
@@ -37,8 +51,9 @@ async function processInvoice(
         return {
           lineNumber: index + 1,
           description: item.description,
-          quantity: item.quantity,
+          quantity: verifiedQuantity,
           unitPrice: item.unitPrice,
+          discount,
           lineTotal: item.lineTotal,
           ivaCategory: classification.category,
           ivaRate: classification.rate,

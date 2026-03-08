@@ -22,6 +22,7 @@ export interface ExtractedLineItem {
   description: string;
   quantity: number;
   unitPrice: number;
+  discount: number;
   lineTotal: number;
   ivaIndicator: string | null;
 }
@@ -55,6 +56,7 @@ export interface InvoiceWithLineItems {
     description: string;
     quantity: number;
     unitPrice: number;
+    discount: number;
     lineTotal: number;
     ivaCategory: IvaCategory;
     ivaRate: number;

@@ -65,6 +65,7 @@ export interface InvoiceData {
     description: string;
     quantity: string;
     unitPrice: string;
+    discount: string;
     lineTotal: string;
     ivaCategory: "BASICA" | "MINIMA" | "EXPORTACION" | "EXONERADO";
     ivaRate: string;
@@ -404,6 +405,7 @@ export default function InvoiceDetailClient({
                     <TableHead className="text-xs">Descripción</TableHead>
                     <TableHead className="text-right text-xs">Cant.</TableHead>
                     <TableHead className="text-right text-xs">P. Unit.</TableHead>
+                    <TableHead className="text-right text-xs">Desc.</TableHead>
                     <TableHead className="text-right text-xs">Total</TableHead>
                     <TableHead className="text-xs">IVA</TableHead>
                   </TableRow>
@@ -427,6 +429,11 @@ export default function InvoiceDetailClient({
                         {Number(item.unitPrice).toLocaleString("es-UY", {
                           minimumFractionDigits: 2,
                         })}
+                      </TableCell>
+                      <TableCell className="text-right text-xs py-2">
+                        {Number(item.discount) > 0
+                          ? `${Number(item.discount)}%`
+                          : "—"}
                       </TableCell>
                       <TableCell className="text-right text-xs py-2 font-medium">
                         {Number(item.lineTotal).toLocaleString("es-UY", {

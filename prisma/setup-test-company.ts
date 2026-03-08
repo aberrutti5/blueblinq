@@ -22,7 +22,7 @@ async function main() {
       data: {
         email: TEST_EMAIL,
         name: "Agus Test",
-        // Hash bcrypt generado para "test1234" — cámbialo si querés otra contraseña
+        // Hash bcrypt para "test1234" 
         passwordHash: "$2b$10$rxQBTzMljs22NT3YIrq5keOGXV5memzimw81y1fIxcKdDFFf1.pZ6",
       },
     });

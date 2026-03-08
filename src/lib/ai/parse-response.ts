@@ -5,6 +5,7 @@ const lineItemSchema = z.object({
   description: z.string(),
   quantity: z.number(),
   unitPrice: z.number(),
+  discount: z.number().default(0),
   lineTotal: z.number(),
   ivaIndicator: z.string().nullable(),
 });

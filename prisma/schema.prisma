@@ -171,6 +171,7 @@ model InvoiceLineItem {
   description  String
   quantity     Decimal     @db.Decimal(12, 4)
   unitPrice    Decimal     @db.Decimal(15, 2)
+  discount     Decimal     @default(0) @db.Decimal(5, 2)
   lineTotal    Decimal     @db.Decimal(15, 2)
   ivaCategory  IvaCategory @default(BASICA)
   ivaRate      Decimal     @db.Decimal(5, 2)

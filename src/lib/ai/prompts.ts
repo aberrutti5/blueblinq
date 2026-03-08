@@ -18,6 +18,7 @@ Required JSON structure:
       "description": "product/service description",
       "quantity": number,
       "unitPrice": number,
+      "discount": number or 0,
       "lineTotal": number,
       "ivaIndicator": "any IVA text visible near this line item, or null"
     }
@@ -35,6 +36,7 @@ Rules:
 - Amounts must be numbers, not strings. Use dot as decimal separator.
 - If a field is not visible or legible, use null.
 - Extract ALL line items visible on the invoice.
+- "discount" is the discount percentage applied to the line item (e.g., 10 means 10%). Use 0 if no discount is visible.
 - The "ivaIndicator" should capture any IVA-related text near each line (e.g., "IVA 22%", "IVA 10%", "Exento", "Mín", "Bás", "*", "**").
 - For confidence: 1.0 = perfectly clear invoice, 0.5 = partially legible, 0.0 = mostly unreadable.
 - Return ONLY the JSON object, no other text.`;
