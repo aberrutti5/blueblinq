@@ -70,6 +70,7 @@ model Company {
   memberships CompanyMembership[]
   invoices    Invoice[]
   vendors     Vendor[]
+  products    Product[]
   ivaRules    IvaClassificationRule[]
 }
 
@@ -115,6 +116,7 @@ model Vendor {
 
   company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   invoices Invoice[]
+  products Product[]
 
   @@unique([companyId, rut])
   @@index([companyId])
@@ -167,6 +169,7 @@ model Invoice {
 model InvoiceLineItem {
   id           String      @id @default(cuid())
   invoiceId    String
+  productId    String?
   lineNumber   Int
   description  String
   quantity     Decimal     @db.Decimal(12, 4)
@@ -177,10 +180,13 @@ model InvoiceLineItem {
   ivaRate      Decimal     @db.Decimal(5, 2)
   ivaAmount    Decimal     @db.Decimal(15, 2)
   classifiedBy String      @default("AI")
+  matchedBy    String?     // "EXACT" | "ALIAS" | "AI" | null (how product was matched)
 
-  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoice Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
 
   @@index([invoiceId])
+  @@index([productId])
 }
 
 enum InvoiceStatus {
@@ -209,6 +215,44 @@ enum IvaCategory {
   MINIMA
   EXPORTACION
   EXONERADO
+}
+
+// ─── PRODUCT CATALOG ─────────────────────────────────────────────
+
+model Product {
+  id          String      @id @default(cuid())
+  companyId   String
+  vendorId    String?
+  name        String      // Canonical name (from Memory / original system)
+  sku         String?
+  description String?
+  ivaCategory IvaCategory @default(BASICA)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  company   Company              @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  vendor    Vendor?              @relation(fields: [vendorId], references: [id])
+  lineItems InvoiceLineItem[]
+  aliases   ProductAlias[]
+
+  @@unique([companyId, vendorId, name])
+  @@index([companyId])
+  @@index([vendorId])
+}
+
+// Aliases allow mapping different invoice names to the same canonical product.
+// E.g., product "Agua Mineral 500ml" in Memory might appear as "AGUA MIN 500" on invoices.
+model ProductAlias {
+  id        String   @id @default(cuid())
+  productId String
+  alias     String   // The alternative name as it appears on invoices
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, alias])
+  @@index([alias])
 }
 
 // ─── IVA CLASSIFICATION RULES ────────────────────────────────────

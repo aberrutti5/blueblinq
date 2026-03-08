@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, FileImage, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Upload, FileText, FileImage, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -112,7 +112,7 @@ export function InvoiceUploadForm() {
             <input
               type="file"
               className="hidden"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
+              accept="application/pdf,image/jpeg,image/png,image/webp"
               onChange={(e) => {
                 const f = e.target.files?.[0];
                 if (f) handleFile(f);
@@ -132,11 +132,20 @@ export function InvoiceUploadForm() {
               </div>
             ) : file ? (
               <div className="flex flex-col items-center gap-2">
-                <FileImage className="h-12 w-12 text-green-500" />
+                {file.type === "application/pdf" ? (
+                  <FileText className="h-12 w-12 text-red-500" />
+                ) : (
+                  <FileImage className="h-12 w-12 text-green-500" />
+                )}
                 <p className="font-medium">{file.name}</p>
                 <p className="text-sm text-gray-500">
                   {(file.size / 1024 / 1024).toFixed(2)} MB
                 </p>
+                {file.type === "application/pdf" && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                    PDF — procesamiento optimizado
+                  </span>
+                )}
               </div>
             ) : (
               <div className="flex flex-col items-center gap-3 text-gray-500">
@@ -145,8 +154,10 @@ export function InvoiceUploadForm() {
                   Arrastrá tu factura acá
                 </p>
                 <p className="text-sm">
-                  O hacé click para seleccionar. JPG, PNG, WebP o PDF (máx.
-                  10MB)
+                  O hacé click para seleccionar. <strong>PDF recomendado</strong> (también JPG, PNG, WebP). Máx. 10MB
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Los PDF con texto se procesan más rápido y con menor costo
                 </p>
               </div>
             )}

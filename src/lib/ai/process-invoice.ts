@@ -1,7 +1,9 @@
 import { db } from "@/lib/db";
-import { extractInvoiceFromBase64 } from "@/lib/ai/extract-invoice";
+import { extractInvoiceFromBase64, extractInvoiceFromText } from "@/lib/ai/extract-invoice";
+import { extractTextFromPdf } from "@/lib/pdf/extract-text";
 import { classifyIva, calculateIvaAmount } from "@/lib/tax/iva-classifier";
 import { validateRut } from "@/lib/tax/rut-validator";
+import { matchLineItemsToProducts } from "@/lib/products/match-products";
 
 export function processInvoiceInBackground(
   invoiceId: string,
@@ -21,8 +23,41 @@ async function processInvoice(
   companyId: string
 ) {
   try {
-    const { result, raw } = await extractInvoiceFromBase64(base64, mimeType);
+    // ─── STEP 1: Extract invoice data ──────────────────────────────
+    // For PDFs: try text extraction first (cheap), fall back to vision (expensive)
+    // For images: always use vision
+    let result;
+    let raw;
+    let extractionMethod: "TEXT" | "VISION";
 
+    if (mimeType === "application/pdf") {
+      const buffer = Buffer.from(base64, "base64");
+      const pdfResult = await extractTextFromPdf(buffer);
+
+      if (pdfResult.hasText) {
+        // PDF has extractable text — use cheap text-based extraction
+        console.log(`[processInvoice] PDF has text (${pdfResult.text.length} chars), using text extraction`);
+        const extraction = await extractInvoiceFromText(pdfResult.text);
+        result = extraction.result;
+        raw = extraction.raw;
+        extractionMethod = "TEXT";
+      } else {
+        // Scanned PDF without text layer — fall back to vision
+        console.log(`[processInvoice] PDF is scanned image, falling back to vision`);
+        const extraction = await extractInvoiceFromBase64(base64, mimeType);
+        result = extraction.result;
+        raw = extraction.raw;
+        extractionMethod = "VISION";
+      }
+    } else {
+      // Image file — use vision
+      const extraction = await extractInvoiceFromBase64(base64, mimeType);
+      result = extraction.result;
+      raw = extraction.raw;
+      extractionMethod = "VISION";
+    }
+
+    // ─── STEP 2: Classify IVA for each line item ──────────────────
     const classifiedItems = await Promise.all(
       result.lineItems.map(async (item, index) => {
         const classification = await classifyIva(
@@ -63,6 +98,7 @@ async function processInvoice(
       })
     );
 
+    // ─── STEP 3: Resolve vendor ───────────────────────────────────
     let vendorId: string | undefined;
     if (result.vendor.rut) {
       const rutValidation = validateRut(result.vendor.rut);
@@ -89,6 +125,24 @@ async function processInvoice(
       }
     }
 
+    // ─── STEP 4: Match line items to product catalog ──────────────
+    const productMatches = await matchLineItemsToProducts(
+      classifiedItems.map((item) => ({ description: item.description })),
+      companyId,
+      vendorId
+    );
+
+    // Merge product matches into classified items
+    const itemsWithProducts = classifiedItems.map((item, index) => {
+      const match = productMatches[index];
+      return {
+        ...item,
+        productId: match?.productId ?? undefined,
+        matchedBy: match?.matchedBy ?? undefined,
+      };
+    });
+
+    // ─── STEP 5: Save to database ─────────────────────────────────
     await db.invoice.update({
       where: { id: invoiceId },
       data: {
@@ -107,10 +161,15 @@ async function processInvoice(
         totalIva: result.totalIva,
         totalAmount: result.totalAmount,
         lineItems: {
-          createMany: { data: classifiedItems },
+          createMany: { data: itemsWithProducts },
         },
       },
     });
+
+    console.log(
+      `[processInvoice] Invoice ${invoiceId} extracted via ${extractionMethod}, ` +
+      `${itemsWithProducts.filter((i) => i.productId).length}/${itemsWithProducts.length} products matched`
+    );
   } catch (error) {
     await db.invoice.update({
       where: { id: invoiceId },
