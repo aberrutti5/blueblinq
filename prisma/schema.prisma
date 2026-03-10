@@ -67,6 +67,15 @@ model Company {
   memoryEmail             String?
   memoryPasswordEncrypted String?
 
+  // Email scan / IMAP settings (password stored AES-256-GCM encrypted)
+  emailScanHost              String?
+  emailScanPort              Int?
+  emailScanUser              String?
+  emailScanPasswordEncrypted String?
+  emailScanFolder            String   @default("INBOX")
+  emailScanEnabled           Boolean  @default(false)
+  emailScanLastRun           DateTime?
+
   memberships CompanyMembership[]
   invoices    Invoice[]
   vendors     Vendor[]
@@ -133,6 +142,7 @@ model Invoice {
   fileName      String
   fileType      String
   fileSizeBytes Int?
+  emailMessageId String? // IMAP Message-ID for deduplication
 
   status          InvoiceStatus @default(PENDING)
   extractionRaw   Json?
