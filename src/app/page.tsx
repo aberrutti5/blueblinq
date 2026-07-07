@@ -196,12 +196,21 @@ export default function Home() {
           >
             BlueBlinq.
           </span>
-          <span
-            className="text-white/20 text-xs"
-            style={{ fontFamily: "'Funnel Sans', sans-serif" }}
-          >
-            © {new Date().getFullYear()} BlueBlinq. Todos los derechos reservados.
-          </span>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/terminos"
+              className="text-white/20 hover:text-white/50 text-xs transition-colors"
+              style={{ fontFamily: "'Funnel Sans', sans-serif" }}
+            >
+              Términos y Condiciones
+            </Link>
+            <span
+              className="text-white/20 text-xs"
+              style={{ fontFamily: "'Funnel Sans', sans-serif" }}
+            >
+              © {new Date().getFullYear()} BlueBlinq. Todos los derechos reservados.
+            </span>
+          </div>
         </div>
       </footer>
     </div>
