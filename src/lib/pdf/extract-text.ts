@@ -1,4 +1,4 @@
-import pdfParse from "pdf-parse";
+import { PDFParse } from "pdf-parse";
 
 export interface PdfExtractionResult {
   text: string;
@@ -14,14 +14,20 @@ export interface PdfExtractionResult {
 export async function extractTextFromPdf(
   buffer: Buffer
 ): Promise<PdfExtractionResult> {
-  const data = await pdfParse(buffer);
+  const parser = new PDFParse({ data: buffer });
 
-  const text = data.text.trim();
-  const hasText = text.length > 50; // Minimum threshold to consider it has real text
+  try {
+    const data = await parser.getText();
 
-  return {
-    text,
-    pageCount: data.numpages,
-    hasText,
-  };
+    const text = data.text.trim();
+    const hasText = text.length > 50; // Minimum threshold to consider it has real text
+
+    return {
+      text,
+      pageCount: data.total,
+      hasText,
+    };
+  } finally {
+    await parser.destroy();
+  }
 }
